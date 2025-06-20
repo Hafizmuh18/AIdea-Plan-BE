@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String?
+  image        String?
+  passwordHash String?
+  firebaseUid  String?  @unique
+  authProvider String
+  createdAt    DateTime @default(now())
+
+  ideas Idea[]
+}
+
+model Idea {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+
+  aiNotes       String?
+  aiGeneratedAt DateTime?
+
+  functionalities Functionality[]
+  techStacks      TechStack[]
+  milestones      Milestone[]
+  enhancements    EnhancementIdea[]
+}
+
+model Functionality {
+  id             String  @id @default(uuid())
+  ideaId         String
+  idea           Idea    @relation(fields: [ideaId], references: [id])
+  title          String
+  description    String
+  additionalInfo String?
+}
+
+model TechStack {
+  id             String  @id @default(uuid())
+  ideaId         String
+  idea           Idea    @relation(fields: [ideaId], references: [id])
+  category       String // e.g., Frontend, Backend, AI
+  framework      String
+  description    String
+  additionalInfo String?
+}
+
+model Milestone {
+  id          String       @id @default(uuid())
+  ideaId      String
+  idea        Idea         @relation(fields: [ideaId], references: [id])
+  title       String
+  startTime   DateTime
+  endTime     DateTime
+  finishTime  DateTime?
+  checkpoints Checkpoint[]
+}
+
+model Checkpoint {
+  id          String    @id @default(uuid())
+  milestoneId String
+  milestone   Milestone @relation(fields: [milestoneId], references: [id])
+  name        String
+}
+
+model EnhancementIdea {
+  id      String @id @default(uuid())
+  ideaId  String
+  idea    Idea   @relation(fields: [ideaId], references: [id])
+  content String
+}
