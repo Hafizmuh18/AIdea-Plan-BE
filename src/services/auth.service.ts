@@ -4,12 +4,16 @@ import prisma from "../lib/prisma";
 import admin from "../lib/firebase-admin";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
+if (!JWT_SECRET) throw new Error("Missing JWT_SECRET");
 
 export const registerUser = async (email: string, password: string, name?: string) => {
+  if (!email || !password) throw new Error("Email and password are required");
+
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) throw new Error("Email already registered");
 
   const hashed = await bcrypt.hash(password, 10);
+
   const user = await prisma.user.create({
     data: {
       email,

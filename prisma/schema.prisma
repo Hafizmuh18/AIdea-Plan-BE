@@ -21,23 +21,50 @@ model User {
 }
 
 model Idea {
-  id          String   @id @default(uuid())
-  title       String
-  description String
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  createdAt   DateTime @default(now())
+  id                 String     @id @default(uuid())
+  title              String
+  description        String
+  problemStatement   String?
+  valueProposition   String?
+  targetUsers        String?
+  marketCategory     String?
+  tags               String[]
+  status             IdeaStatus @default(draft)
+  impactScore        Int?
+  inspirationSources String?
 
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  createdAt     DateTime  @default(now())
   aiNotes       String?
   aiGeneratedAt DateTime?
 
-  functionalities Functionality[]
-  techStacks      TechStack[]
-  milestones      Milestone[]
-  enhancements    EnhancementIdea[]
+  functionalities          Functionality[]
+  techStacks               TechStack[]
+  milestones               Milestone[]
+  enhancements             EnhancementIdea[]
+  addtionalFunctionalities AdditionalFunctionality[]
+  referenceMaterials       ReferenceMaterial[]
+  documents                Document[]
+  tasks                    Task[]
+}
+
+enum IdeaStatus {
+  draft
+  in_progress
+  completed
 }
 
 model Functionality {
+  id             String  @id @default(uuid())
+  ideaId         String
+  idea           Idea    @relation(fields: [ideaId], references: [id])
+  title          String
+  description    String
+  additionalInfo String?
+}
+
+model AdditionalFunctionality {
   id             String  @id @default(uuid())
   ideaId         String
   idea           Idea    @relation(fields: [ideaId], references: [id])
@@ -79,4 +106,44 @@ model EnhancementIdea {
   ideaId  String
   idea    Idea   @relation(fields: [ideaId], references: [id])
   content String
+}
+
+model ReferenceMaterial {
+  id        String   @id @default(uuid())
+  ideaId    String
+  idea      Idea     @relation(fields: [ideaId], references: [id])
+  title     String
+  url       String?
+  type      String // e.g., "article", "video", "dataset", "repo"
+  notes     String?
+  createdAt DateTime @default(now())
+}
+
+model Document {
+  id        String   @id @default(uuid())
+  ideaId    String
+  idea      Idea     @relation(fields: [ideaId], references: [id])
+  title     String
+  type      String // e.g., "API Key", "ERD", "Flowchart", "README"
+  content   String? // Bisa markdown, plain text, atau base64 (jika file)
+  url       String? // Optional: jika dokumennya berupa file/link
+  createdAt DateTime @default(now())
+}
+
+model Task {
+  id          String     @id @default(uuid())
+  ideaId      String
+  idea        Idea       @relation(fields: [ideaId], references: [id])
+  title       String
+  description String?
+  status      TaskStatus @default(PENDING)
+  dueDate     DateTime?
+  createdAt   DateTime   @default(now())
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  BLOCKED
 }

@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import authRoutes from "./routes/auth.route";
 import { authMiddleware } from './middlewares/auth.middleware';
 import prisma from './lib/prisma';
+import aiRoutes from "./routes/ai.route";
+
 
 dotenv.config();
 
@@ -22,6 +24,8 @@ app.get('/', (_, res) => {
   res.send('Welcome to AIdeaPlan API!');
 });
 app.use("/api/auth", authRoutes);
+app.use("/api/ai", aiRoutes);
+
 
 app.get('/api/me', authMiddleware, async (req, res) => {
   const userId = (req as any).user.id;
