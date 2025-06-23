@@ -48,7 +48,7 @@ Respond with **only a valid JSON object**, no explanation, no markdown, no code 
     // at least 7
   ],
   "addtionalFunctionalities": [
-    { "title": "...", "description": "..." }
+    { "title": "...", "description": "...", "additionalInfo" : "..." }
     // at least 5
   ],
   "techStacks": [
