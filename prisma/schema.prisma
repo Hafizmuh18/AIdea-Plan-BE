@@ -20,12 +20,12 @@ model Idea {
   impactScore        Int?
   inspirationSources String?
 
-  userId             String
-  user               User       @relation("Owner", fields: [userId], references: [id])
-  collaborators      User[]     @relation("Collaborators")
-  createdAt          DateTime   @default(now())
-  aiNotes            String?
-  aiGeneratedAt      DateTime?
+  userId        String
+  user          User      @relation("Owner", fields: [userId], references: [id])
+  collaborators User[]    @relation("Collaborators")
+  createdAt     DateTime  @default(now())
+  aiNotes       String?
+  aiGeneratedAt DateTime?
 
   functionalities          Functionality[]
   techStacks               TechStack[]
@@ -47,8 +47,8 @@ model User {
   authProvider String
   createdAt    DateTime @default(now())
 
-  ideas         Idea[]   @relation("Owner")
-  collaborations Idea[]  @relation("Collaborators")
+  ideas          Idea[] @relation("Owner")
+  collaborations Idea[] @relation("Collaborators")
 }
 
 enum IdeaStatus {
@@ -79,7 +79,7 @@ model TechStack {
   id             String  @id @default(uuid())
   ideaId         String
   idea           Idea    @relation(fields: [ideaId], references: [id])
-  category       String // e.g., Frontend, Backend, AI
+  category       String 
   framework      String
   description    String
   additionalInfo String?
@@ -126,9 +126,9 @@ model Document {
   ideaId    String
   idea      Idea     @relation(fields: [ideaId], references: [id])
   title     String
-  type      String // e.g., "API Key", "ERD", "Flowchart", "README"
-  content   String? // Bisa markdown, plain text, atau base64 (jika file)
-  url       String? // Optional: jika dokumennya berupa file/link
+  type      String 
+  content   String?
+  url       String? 
   createdAt DateTime @default(now())
 }
 
