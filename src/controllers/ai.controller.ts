@@ -12,6 +12,12 @@ export const generateFromIdea = async (req: Request, res: Response): Promise<voi
   const { title, description } = req.body;
   const userId = (req as any).user?.id;
 
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if(user == null){
+    res.status(400).json({ message: "User not authenticated" });
+    return;
+  }
+
   if (!title || !description) {
     res.status(400).json({ message: "Title and description required." });
     return;

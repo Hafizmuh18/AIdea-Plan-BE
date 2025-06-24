@@ -1,143 +1,172 @@
 import { Request, Response } from "express";
 import prisma from "../lib/prisma";
 
-const notFound = (res: Response, name = "Item") => res.status(404).json({ message: `${name} not found.` });
+const notFound = (res: Response, name = "Item") => {
+    res.status(404).json({ message: `${name} not found.` });
+};
 
 export const getUserIdea = async (req: Request, res: Response) => {
-  const userId = (req as any).user?.id;
+    const userId = (req as any).user?.id;
 
-  const ideas = await prisma.idea.findMany({
-    where: {
-      OR: [
-        { userId },
-        { collaborators: { some: { id: userId } } }
-      ]
-    },
-    include: { functionalities: true }
-  });
+    const ideas = await prisma.idea.findMany({
+        where: {
+            OR: [
+                { userId },
+                { collaborators: { some: { id: userId } } }
+            ]
+        },
+        include: { functionalities: true }
+    });
 
-  res.json(ideas);
+    res.json(ideas);
 };
 
 export const getIdeaById = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const userId = (req as any).user?.id;
+    const { id } = req.params;
+    const userId = (req as any).user?.id;
 
-  const idea = await prisma.idea.findUnique({
-    where: { id },
-    include: {
-      functionalities: true,
-      addtionalFunctionalities: true,
-      techStacks: true,
-      milestones: { include: { checkpoints: true } },
-      enhancements: true,
-      referenceMaterials: true,
-      documents: true,
-      tasks: true,
-      collaborators: { select: { id: true } }
-    },
-  });
+    const idea = await prisma.idea.findUnique({
+        where: { id },
+        include: {
+            functionalities: true,
+            addtionalFunctionalities: true,
+            techStacks: true,
+            milestones: { include: { checkpoints: true } },
+            enhancements: true,
+            referenceMaterials: true,
+            documents: true,
+            tasks: true,
+            collaborators: { select: { id: true } }
+        },
+    });
 
-  if (!idea) return notFound(res, "Idea");
+    if (!idea) {
+        notFound(res, "Idea");
+        return;
+    }
 
-  const isOwner = idea.userId === userId;
-  const isCollaborator = idea.collaborators.some((c) => c.id === userId);
+    const isOwner = idea.userId === userId;
+    const isCollaborator = idea.collaborators.some((c) => c.id === userId);
 
-  if (!isOwner && !isCollaborator) {
-    return res.status(403).json({ message: "Not authorized to view this idea." });
-  }
+    if (!isOwner && !isCollaborator) {
+        res.status(403).json({ message: "Not authorized to view this idea." });
+        return;
+    }
 
-  res.json(idea);
+    res.json(idea);
 };
 
 export const updateIdea = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const userId = (req as any).user?.id;
+    const { id } = req.params;
+    const userId = (req as any).user?.id;
 
-  const idea = await prisma.idea.findUnique({
-    where: { id },
-    include: { collaborators: { select: { id: true } } }
-  });
+    const idea = await prisma.idea.findUnique({
+        where: { id },
+        include: { collaborators: { select: { id: true } } }
+    });
 
-  if (!idea) return notFound(res, "Idea");
+    if (!idea) {
+        notFound(res, "Idea");
+        return;
+    }
 
-  const isOwner = idea.userId === userId;
-  const isCollaborator = idea.collaborators.some((c) => c.id === userId);
+    const isOwner = idea.userId === userId;
+    const isCollaborator = idea.collaborators.some((c) => c.id === userId);
 
-  if (!isOwner && !isCollaborator) {
-    return res.status(403).json({ message: "Not authorized to update this idea." });
-  }
+    if (!isOwner && !isCollaborator) {
+        res.status(403).json({ message: "Not authorized to update this idea." });
+        return;
+    }
 
-  const updated = await prisma.idea.update({ where: { id }, data: req.body });
-  res.json(updated);
+    const updated = await prisma.idea.update({ where: { id }, data: req.body });
+    res.json(updated);
 };
 
 export const deleteIdea = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const userId = (req as any).user?.id;
+    const { id } = req.params;
+    const userId = (req as any).user?.id;
 
-  const idea = await prisma.idea.findUnique({ where: { id } });
-  if (!idea) return notFound(res, "Idea");
+    const idea = await prisma.idea.findUnique({ where: { id } });
+    if (!idea) {
+        notFound(res, "Idea");
+        return;
+    }
 
-  if (idea.userId !== userId) {
-    return res.status(403).json({ message: "Only the owner can delete this idea." });
-  }
+    if (idea.userId !== userId) {
+        res.status(403).json({ message: "Only the owner can delete this idea." });
+        return;
+    }
 
-  await prisma.idea.delete({ where: { id } });
-  res.json({ message: "Idea deleted" });
+    await prisma.idea.delete({ where: { id } });
+    res.json({ message: "Idea deleted" });
 };
 
 export const addUserToIdea = async (req: Request, res: Response) => {
-  const { ideaId, email } = req.body;
+    const { ideaId, email } = req.body;
 
-  const idea = await prisma.idea.findUnique({ where: { id: ideaId }, include: { user: true } });
-  if (!idea) return notFound(res, "Idea");
-
-  const currentUserId = (req as any).user?.id;
-  if (idea.userId !== currentUserId) {
-    return res.status(403).json({ message: "Only the owner can add collaborators." });
-  }
-
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) return notFound(res, "User");
-
-  await prisma.idea.update({
-    where: { id: ideaId },
-    data: {
-      collaborators: {
-        connect: { id: user.id }
-      }
+    const idea = await prisma.idea.findUnique({ where: { id: ideaId }, include: { user: true } });
+    if (!idea) {
+        notFound(res, "Idea");
+        return;
     }
-  });
 
-  res.json({ message: `User ${email} added as collaborator.` });
+    const currentUserId = (req as any).user?.id;
+    if (idea.userId !== currentUserId) {
+        res.status(403).json({ message: "Only the owner can add collaborators." });
+        return;
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+        notFound(res, "User");
+        return;
+    }
+
+    await prisma.idea.update({
+        where: { id: ideaId },
+        data: {
+            collaborators: {
+                connect: { id: user.id }
+            }
+        }
+    });
+
+    res.json({ message: `User ${email} added as collaborator.` });
 };
 
 export const removeUserFromIdea = async (req: Request, res: Response) => {
-  const { ideaId, email } = req.body;
+    const { ideaId, email } = req.body;
 
-  const idea = await prisma.idea.findUnique({ where: { id: ideaId }, include: { user: true } });
-  if (!idea) return notFound(res, "Idea");
-
-  const currentUserId = (req as any).user?.id;
-  if (idea.userId !== currentUserId) {
-    return res.status(403).json({ message: "Only the owner can remove collaborators." });
-  }
-
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) return notFound(res, "User");
-
-  await prisma.idea.update({
-    where: { id: ideaId },
-    data: {
-      collaborators: {
-        disconnect: { id: user.id }
-      }
+    const idea = await prisma.idea.findUnique({ where: { id: ideaId }, include: { user: true } });
+    if (!idea) {
+        notFound(res, "Idea");
+        return;
     }
-  });
 
-  res.json({ message: `User ${email} removed from collaborators.` });
+    const currentUserId = (req as any).user?.id;
+    if (idea.userId !== currentUserId) {
+        res.status(403).json({ message: "Only the owner can remove collaborators." });
+        return; 
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+        notFound(res, "User");
+        return; 
+    }
+
+    await prisma.idea.update({
+        where: { id: ideaId },
+        data: {
+            collaborators: {
+                disconnect: { id: user.id }
+            }
+        }
+    });
+
+    res.json({ message: `User ${email} removed from collaborators.` });
 };
+
 export const addFunctionality = async (req: Request, res: Response) => {
   const { ideaId, title, description, additionalInfo } = req.body;
   const func = await prisma.functionality.create({ data: { ideaId, title, description, additionalInfo } });
