@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../lib/prisma";
+import { AddUserToIdeaDto, RemoveUserFromIdeaDto } from "../dto/ideas/user.dto";
 
 const notFound = (res: Response, name = "Item") => {
     res.status(404).json({ message: `${name} not found.` });
@@ -102,69 +103,75 @@ export const deleteIdea = async (req: Request, res: Response) => {
 };
 
 export const addUserToIdea = async (req: Request, res: Response) => {
-    const { ideaId, email } = req.body;
+  const parsed = AddUserToIdeaDto.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ errors: parsed.error.flatten() });
+    return;
+  }
+  const { ideaId, email } = parsed.data;
 
-    const idea = await prisma.idea.findUnique({ where: { id: ideaId }, include: { user: true } });
-    if (!idea) {
-        notFound(res, "Idea");
-        return;
-    }
+  const idea = await prisma.idea.findUnique({ where: { id: ideaId }, include: { user: true } });
+  if (!idea){
+    notFound(res, "Idea");
+    return;
+  } 
 
-    const currentUserId = (req as any).user?.id;
-    if (idea.userId !== currentUserId) {
-        res.status(403).json({ message: "Only the owner can add collaborators." });
-        return;
-    }
+  const currentUserId = (req as any).user?.id;
+  if (idea.userId !== currentUserId) {
+    res.status(403).json({ message: "Only the owner can add collaborators." });
+    return;
+  }
 
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-        notFound(res, "User");
-        return;
-    }
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user){
+    notFound(res, "User");
+    return;
+  } 
 
-    await prisma.idea.update({
-        where: { id: ideaId },
-        data: {
-            collaborators: {
-                connect: { id: user.id }
-            }
-        }
-    });
+  await prisma.idea.update({
+    where: { id: ideaId },
+    data: {
+      collaborators: { connect: { id: user.id } },
+    },
+  });
 
-    res.json({ message: `User ${email} added as collaborator.` });
+  res.json({ message: `User ${email} added as collaborator.` });
 };
 
 export const removeUserFromIdea = async (req: Request, res: Response) => {
-    const { ideaId, email } = req.body;
+  const parsed = RemoveUserFromIdeaDto.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ errors: parsed.error.flatten() });
+    return;
+  }
+  const { ideaId, email } = parsed.data;
 
-    const idea = await prisma.idea.findUnique({ where: { id: ideaId }, include: { user: true } });
-    if (!idea) {
-        notFound(res, "Idea");
-        return;
-    }
+  const idea = await prisma.idea.findUnique({ where: { id: ideaId }, include: { user: true } });
+  if (!idea){
+    notFound(res, "Idea");
+    return;
+  } 
 
-    const currentUserId = (req as any).user?.id;
-    if (idea.userId !== currentUserId) {
-        res.status(403).json({ message: "Only the owner can remove collaborators." });
-        return; 
-    }
+  const currentUserId = (req as any).user?.id;
+  if (idea.userId !== currentUserId) {
+    res.status(403).json({ message: "Only the owner can remove collaborators." });
+    return;
+  }
 
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-        notFound(res, "User");
-        return; 
-    }
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user){
+    notFound(res, "User");
+    return;
+  }
 
-    await prisma.idea.update({
-        where: { id: ideaId },
-        data: {
-            collaborators: {
-                disconnect: { id: user.id }
-            }
-        }
-    });
+  await prisma.idea.update({
+    where: { id: ideaId },
+    data: {
+      collaborators: { disconnect: { id: user.id } },
+    },
+  });
 
-    res.json({ message: `User ${email} removed from collaborators.` });
+  res.json({ message: `User ${email} removed from collaborators.` });
 };
 
 export const addFunctionality = async (req: Request, res: Response) => {
