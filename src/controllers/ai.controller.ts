@@ -24,73 +24,73 @@ export const generateFromIdea = async (req: Request, res: Response): Promise<voi
   const today = new Date().toISOString().split("T")[0];
 
   const prompt = `
-You are an expert software product architect AI.
-Your task is to help users break down their software idea into a complete technical plan based on the following:
+  You are an expert software product architect AI.
+  Your task is to help users break down their software idea into a complete technical plan based on the following:
 
-- Title: ${title}
-- Description: ${description}
-- Today: ${today}
+  - Title: ${title}
+  - Description: ${description}
+  - Today: ${today}
 
-Respond with **only a valid JSON object**, no explanation, no markdown, no code blocks. Follow the format below and ensure fields are correctly filled and complete:
+  Respond with **only a valid JSON object**, no explanation, no markdown, no code blocks. Follow the format below and ensure fields are correctly filled and complete:
 
-{
-  "summary": "...",
-  "problemStatement": "...",
-  "valueProposition": "...",
-  "targetUsers": "...",
-  "marketCategory": "...",
-  "tags": ["...", "..."],
-  "impactScore": 75,
-  "inspirationSources": "...",
+  {
+    "summary": "...",
+    "problemStatement": "...",
+    "valueProposition": "...",
+    "targetUsers": "...",
+    "marketCategory": "...",
+    "tags": ["...", "..."],
+    "impactScore": 75,
+    "inspirationSources": "...",
 
-  "functionalities": [
-    { "title": "...", "description": "...", "additionalInfo": "..." }
-    // at least 7
-  ],
-  "addtionalFunctionalities": [
-    { "title": "...", "description": "...", "additionalInfo" : "..." }
-    // at least 5
-  ],
-  "techStacks": [
-    { "category": "Frontend", "framework": "...", "description": "...", "additionalInfo": "..." },
-    { "category": "Backend", "framework": "...", "description": "...", "additionalInfo": "..." }
-    // multiple, cover Frontend, Backend, Database, Auth, AI, etc.
-  ],
-  "milestones": [
-    {
-      "title": "...",
-      "startTime": "${today}T00:00:00Z",
-      "endTime": "${today}T03:00:00Z",
-      "finishTime": "${today}T03:00:00Z",
-      "checkpoints": ["...", "..."]
-    }
-    // at least 5 milestones
-  ],
-  "enhancements": ["...", "..."],
+    "functionalities": [
+      { "title": "...", "description": "...", "additionalInfo": "..." }
+      // at least 7
+    ],
+    "addtionalFunctionalities": [
+      { "title": "...", "description": "...", "additionalInfo" : "..." }
+      // at least 5
+    ],
+    "techStacks": [
+      { "category": "Frontend", "framework": "...", "description": "...", "additionalInfo": "..." },
+      { "category": "Backend", "framework": "...", "description": "...", "additionalInfo": "..." }
+      // multiple, cover Frontend, Backend, Database, Auth, AI, etc.
+    ],
+    "milestones": [
+      {
+        "title": "...",
+        "startTime": "${today}T00:00:00Z",
+        "endTime": "${today}T03:00:00Z",
+        "finishTime": "${today}T03:00:00Z",
+        "checkpoints": ["...", "..."]
+      }
+      // at least 5 milestones
+    ],
+    "enhancements": ["...", "..."],
 
-  "referenceMaterials": [
-    {
-      "title": "...",
-      "type": "article | repo | video | dataset",
-      "url": "https://...",
-      "notes": "..."
-    }
-    // at least 3
-  ],
-  "documents": [
-    {
-      "title": "...",
-      "type": "README | ERD | Flowchart | API Spec | API Key | ...",
-      "content": "What should be included in this document"
-    }
-    // at least 3
-  ],
-  "tasks": [
-    { "title": "...", "description": "..." }
-    // at least 10
-  ]
-}
-`;
+    "referenceMaterials": [
+      {
+        "title": "...",
+        "type": "article | repo | video | dataset",
+        "url": "https://...",
+        "notes": "..."
+      }
+      // at least 3
+    ],
+    "documents": [
+      {
+        "title": "...",
+        "type": "README | ERD | Flowchart | API Spec | API Key | ...",
+        "content": "What should be included in this document"
+      }
+      // at least 3
+    ],
+    "tasks": [
+      { "title": "...", "description": "..." }
+      // at least 10
+    ]
+  }
+  `;
 
   let content = "";
   try {
