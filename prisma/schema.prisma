@@ -7,19 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  name         String?
-  image        String?
-  passwordHash String?
-  firebaseUid  String?  @unique
-  authProvider String
-  createdAt    DateTime @default(now())
-
-  ideas Idea[]
-}
-
 model Idea {
   id                 String     @id @default(uuid())
   title              String
@@ -33,11 +20,12 @@ model Idea {
   impactScore        Int?
   inspirationSources String?
 
-  userId        String
-  user          User      @relation(fields: [userId], references: [id])
-  createdAt     DateTime  @default(now())
-  aiNotes       String?
-  aiGeneratedAt DateTime?
+  userId             String
+  user               User       @relation("Owner", fields: [userId], references: [id])
+  collaborators      User[]     @relation("Collaborators")
+  createdAt          DateTime   @default(now())
+  aiNotes            String?
+  aiGeneratedAt      DateTime?
 
   functionalities          Functionality[]
   techStacks               TechStack[]
@@ -47,6 +35,20 @@ model Idea {
   referenceMaterials       ReferenceMaterial[]
   documents                Document[]
   tasks                    Task[]
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String?
+  image        String?
+  passwordHash String?
+  firebaseUid  String?  @unique
+  authProvider String
+  createdAt    DateTime @default(now())
+
+  ideas         Idea[]   @relation("Owner")
+  collaborations Idea[]  @relation("Collaborators")
 }
 
 enum IdeaStatus {
