@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { getUserIdea, addUserToIdea, deleteIdea, updateIdea, removeUserFromIdea } from "../../src/controllers/idea.controller";
-import prisma from "../../src/lib/prisma";
-import { AddUserToIdeaDto, RemoveUserFromIdeaDto } from "../../src/dto/ideas/user.dto";
+import { getUserIdea, addUserToIdea, deleteIdea, updateIdea, removeUserFromIdea } from "../../controllers/idea.controller";
+import prisma from "../../lib/prisma";
+import { AddUserToIdeaDto, RemoveUserFromIdeaDto } from "../../dto/ideas/user.dto";
 
 describe("Idea Controller", () => {
   let mockReq: any;
@@ -217,3 +217,6 @@ describe("Idea Controller", () => {
     expect(mockRes.json).toHaveBeenCalledWith({ message: "User not found." });
   });
 });
+
+
+
