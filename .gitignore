@@ -84,3 +84,5 @@ prisma/migrations/
 Thumbs.db
 
 .key/
+
+.qodo/

@@ -16,7 +16,7 @@ export const getUserIdea = async (req: Request, res: Response) => {
                 { collaborators: { some: { id: userId } } }
             ]
         },
-        include: { functionalities: true }
+        include: { functionalities: true, techStacks: true}
     });
 
     res.json(ideas);
