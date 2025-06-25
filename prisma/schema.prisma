@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Idea {
+  id                 String     @id @default(uuid())
+  title              String
+  description        String
+  problemStatement   String?
+  valueProposition   String?
+  targetUsers        String?
+  marketCategory     String?
+  tags               String[]
+  status             IdeaStatus @default(draft)
+  impactScore        Int?
+  inspirationSources String?
+
+  userId        String
+  user          User      @relation("Owner", fields: [userId], references: [id])
+  collaborators User[]    @relation("Collaborators")
+  createdAt     DateTime  @default(now())
+  aiNotes       String?
+  aiGeneratedAt DateTime?
+
+  functionalities          Functionality[]
+  techStacks               TechStack[]
+  milestones               Milestone[]
+  enhancements             EnhancementIdea[]
+  addtionalFunctionalities AdditionalFunctionality[]
+  referenceMaterials       ReferenceMaterial[]
+  documents                Document[]
+  tasks                    Task[]
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String?
+  image        String?
+  passwordHash String?
+  firebaseUid  String?  @unique
+  authProvider String
+  createdAt    DateTime @default(now())
+
+  ideas          Idea[] @relation("Owner")
+  collaborations Idea[] @relation("Collaborators")
+}
+
+enum IdeaStatus {
+  draft
+  in_progress
+  completed
+}
+
+model Functionality {
+  id             String  @id @default(uuid())
+  ideaId         String
+  idea           Idea    @relation(fields: [ideaId], references: [id])
+  title          String
+  description    String
+  additionalInfo String?
+}
+
+model AdditionalFunctionality {
+  id             String  @id @default(uuid())
+  ideaId         String
+  idea           Idea    @relation(fields: [ideaId], references: [id])
+  title          String
+  description    String
+  additionalInfo String?
+}
+
+model TechStack {
+  id             String  @id @default(uuid())
+  ideaId         String
+  idea           Idea    @relation(fields: [ideaId], references: [id])
+  category       String 
+  framework      String
+  description    String
+  additionalInfo String?
+}
+
+model Milestone {
+  id          String       @id @default(uuid())
+  ideaId      String
+  idea        Idea         @relation(fields: [ideaId], references: [id])
+  title       String
+  startTime   DateTime
+  endTime     DateTime
+  finishTime  DateTime?
+  checkpoints Checkpoint[]
+}
+
+model Checkpoint {
+  id          String    @id @default(uuid())
+  milestoneId String
+  milestone   Milestone @relation(fields: [milestoneId], references: [id])
+  name        String
+}
+
+model EnhancementIdea {
+  id      String @id @default(uuid())
+  ideaId  String
+  idea    Idea   @relation(fields: [ideaId], references: [id])
+  content String
+}
+
+model ReferenceMaterial {
+  id        String   @id @default(uuid())
+  ideaId    String
+  idea      Idea     @relation(fields: [ideaId], references: [id])
+  title     String
+  url       String?
+  type      String // e.g., "article", "video", "dataset", "repo"
+  notes     String?
+  createdAt DateTime @default(now())
+}
+
+model Document {
+  id        String   @id @default(uuid())
+  ideaId    String
+  idea      Idea     @relation(fields: [ideaId], references: [id])
+  title     String
+  type      String 
+  content   String?
+  url       String? 
+  createdAt DateTime @default(now())
+}
+
+model Task {
+  id          String     @id @default(uuid())
+  ideaId      String
+  idea        Idea       @relation(fields: [ideaId], references: [id])
+  title       String
+  description String?
+  status      TaskStatus @default(PENDING)
+  dueDate     DateTime?
+  createdAt   DateTime   @default(now())
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  BLOCKED
+}

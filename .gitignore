@@ -59,3 +59,30 @@ typings/
 
 # next.js build output
 .next
+/src/generated/prisma
+
+# Node
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+
+# Prisma
+prisma/dev.db
+prisma/migrations/
+*.sqlite
+
+# Logs
+*.log
+
+# Build artifacts
+*.tsbuildinfo
+
+# OS
+.DS_Store
+Thumbs.db
+
+.key/
+
+.qodo/
